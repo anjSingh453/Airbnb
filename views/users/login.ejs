@@ -1,0 +1,58 @@
+<!-- <% layout("/layouts/boilerplate") %>
+
+<div class="row mt-3">
+    <h1 class="col-6  offset-3">Login</h1>
+    <div class="col-6  offset-3">
+        <form action="/login" method="POST" novalidate class="needs-validation">
+           
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input name="username" id="username" type="text" class="form-control" required />
+                  </div>
+
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input name="password" id="password" type="text" class="form-control" required />
+            </div>
+            <button class="btn btn-success ">Login</button>
+        </form>
+    </div>
+</div> -->
+
+
+
+<% layout("/layouts/boilerplate") %>
+
+    <style>
+        
+        /* Flexbox layout for the main container */
+        .wrapper {
+            /* display: flex;
+            flex-direction: column; */
+            min-height: 70vh;   /*Full height of the viewport*/
+        }
+    </style>
+
+<div class="wrapper">
+        <div class="row mt-3">
+            <h1 class="col-6 offset-3">Login</h1>
+            <div class="col-6 offset-3 ">  
+                <form action="/login" method="POST" novalidate class="needs-validation">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input name="username" id="username" type="text" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input name="password" id="password" type="text" class="form-control" required />
+                    </div>
+                    <button class="btn btn-success mt-3">Login</button> <!-- Added margin-top -->
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+ 

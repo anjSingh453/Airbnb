@@ -4,7 +4,12 @@ const Listing = require("../models/listing.js");
 const wrapAsync = require("../utils/wrapAsync.js");
 const ExpressError = require("../utils/expressError.js");
 const { listingSchema , reviewSchema} = require("../schema.js");
- 
+const {isLoggedIn , isOwner} = require("../middleware.js");
+const listingController = require("../controllers/listings.js");
+const multer = require("multer");
+const {storage} = require("../cloudConfig.js");
+const upload = multer({storage});
+
 
 
 const validateListing = (req, res, next) => {
@@ -18,100 +23,85 @@ const validateListing = (req, res, next) => {
   }
 };
 
+//mergering two route jo baar baar use ho rahe hai
+router.route("/")
+.get( wrapAsync(listingController.index))
+.post(
+    isLoggedIn,
+    validateListing,
+    upload.single("listing[image]") ,
+    wrapAsync(listingController.createListing),
+);
+ 
 
-// Index route to show all listings
-router.get(
-  "/",
-  wrapAsync(async (req, res) => {
-    const alllistings = await Listing.find({});
-    res.render("listings/index.ejs", { alllistings });
-  })
+//  Create route for making a new listing
+router.get("/new", isLoggedIn , listingController.renderNewForm  );
+
+
+router.route("/:id")
+.get(wrapAsync(listingController.showListing))
+.put(
+  isLoggedIn,
+  isOwner ,
+  validateListing,
+  wrapAsync(listingController.updateListing)
+)
+.delete(
+  isLoggedIn,
+  isOwner,
+  wrapAsync(listingController.destoryListing)
 );
 
 
+// Index route to show all listings
+// router.get( "/", wrapAsync(listingController.index));
 
-// Create route for making a new listing
-router.get("/new", (req, res) => {
-    res.render("listings/new.ejs");
-  });
+
+
+// // Create route for making a new listing
+// router.get("/new", isLoggedIn , listingController.renderNewForm  );
   
-  router.post(
-    "/",
-    validateListing,
-    wrapAsync(async (req, res, next) => {
-      console.log(req.body);
-      const { title, description, image, price, country, location } = req.body.listing;
-  
-      const newListing = new Listing({
-        title,
-        description,
-        image,
-        price,
-        country,
-        location,
-      });
-  
-      await newListing.save();
-      req.flash("success" , "New Listing Created!");
-      res.redirect("/listings");
-    })
-  );
+  // router.post(
+  //   "/",
+  //   isLoggedIn,
+  //   validateListing,
+  //   wrapAsync(listingController.createListing)
+  // );
 
 
 
 // Show route to read a specific listing
-router.get(
-    "/:id",
-    wrapAsync(async (req, res) => {
-      let { id } = req.params;
-      const list = await Listing.findById(id).populate("reviews");
-      if(!list){
-        req.flash("error" , "Listing you requested for does not exit!");
-        res.redirect("/listings");
-      }
-      res.render("listings/show.ejs", { list });
-    })
-  );
+// router.get(
+//     "/:id",
+//     wrapAsync(listingController.showListing)
+//   );
 
 
 
 //Edit Route
 router.get(
     "/:id/edit",  
-    wrapAsync(async (req, res) => {
-      let { id } = req.params;
-      const listing = await Listing.findById(id);
-      if(!listing){
-        req.flash("error" ,"Listing you requested for does not exit!");
-        res.redirect("/listings");
-      }
-      res.render("listings/edit.ejs", { listing });
-    })
+    isLoggedIn,
+    isOwner,
+    wrapAsync(listingController.renderEditForm)
   );
   
   //Update Route
-  router.put(
-    "/:id",
-    
-    wrapAsync(async (req, res) => {
-      let { id } = req.params;
-      await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-      req.flash("success" , "Listing Updated!");
-      res.redirect(`/listings/${id}`);
-    })
-  );
+  // router.put(
+  //   "/:id",
+  //   isLoggedIn,
+  //   isOwner ,
+  //   validateListing,
+  //   wrapAsync(listingController.updateListing)
+  // );
   
   //Delete Route
-  router.delete(
-    "/:id",
-    wrapAsync(async (req, res) => {
-      let { id } = req.params;
-      let deletedListing = await Listing.findByIdAndDelete(id);
-      console.log(deletedListing);
-      req.flash("success" , "Listing Deleted!");
-      res.redirect("/listings");
-    })
-  );
+  // router.delete(
+  //   "/:id",
+  //   isLoggedIn,
+  //   isOwner,
+  //   wrapAsync(listingController.destoryListing)
+  // );
   
 
 module.exports =router;

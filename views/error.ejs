@@ -1,9 +1,21 @@
 <%layout("/layouts/boilerplate")%>
+<style>
+        
+    /* Flexbox layout for the main container */
+    .wrapper {
+        /* display: flex;
+        flex-direction: column; */
+        min-height: 70vh;   /*Full height of the viewport*/
+    }
+</style>
+
+<div class="wrapper">
  
 <div class="row mt-3">
-<div class="alert alert-danger" role="alert">  
+<div class="alert alert-danger mt-5" role="alert">  
 <h4><%=message%></h4>  
  
+</div>
 </div>
 </div>
 

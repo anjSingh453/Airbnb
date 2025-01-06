@@ -1,3 +1,6 @@
+if(process.env.NODE_ENV != "production"){  //so that yeh deployment k time file na jaye
+  require("dotenv").config();
+  }
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -7,11 +10,16 @@ const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/expressError.js");
 const { listingSchema , reviewSchema} = require("./schema.js");
 const Review = require("./models/review.js");
-const listings =require("./routes/listing.js");
-const reviews =require("./routes/reviews.js");
+const listingsRouter =require("./routes/listing.js");
+const reviewsRouter =require("./routes/reviews.js");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const localStrategy = require("passport-local");
+const User = require("./models/user.js");
+const userRouter = require("./routes/user.js");
 
+ 
 
 
 
@@ -48,12 +56,32 @@ app.get("/", (req, res) => {
 app.use(session(sessionOptions));
 app.use(flash());
 
+//middleware that support passport
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+
+
+
 // middleware for flash
 app.use((req,res,next)=>{
   res.locals.success =req.flash("success");
   res.locals.error =req.flash("error");
+  res.locals.currUser = req.user;
   next();
 })
+
+// app.get("/demouser" , async(req, res)=>{
+//   let fakeuser = new User({
+//     email: "studen@gmail.com",
+//     username : "delta student",
+//   });
+//   let registeruser = await User.register(fakeuser , "helloword");
+//   res.send((registeruser));
+// })
 
 // creating the database
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
@@ -71,8 +99,9 @@ async function main() {
  
 
 // use routing 
-app.use("/listings" , listings);
-app.use("/listings/:id/reviews" , reviews);
+app.use("/listings" , listingsRouter);
+app.use("/listings/:id/reviews" , reviewsRouter);
+app.use("/" , userRouter);
 
 // jo bhi data aa raha vo parse ho paye isliye humne yeh line likhi hai
 // Middleware to parse URL-encoded data
@@ -92,3 +121,6 @@ app.use((err, req, res, next) => {
 app.listen(8080, () => {
     console.log("server is listening to port 8080");
 });
+
+
+ 
